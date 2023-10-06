@@ -2,10 +2,10 @@ import os
 
 from modules.plugin_base import AbstractPlugin
 
-__all__ = ["TemplatePlugin"]
+__all__ = ["AuthCore"]
 
 
-class TemplatePlugin(AbstractPlugin):
+class AuthCore(AbstractPlugin):
     CONFIG_DETECTED_KEYWORD = "detected_keyword"
 
     def _get_config_parent_dir(self) -> str:
@@ -13,11 +13,11 @@ class TemplatePlugin(AbstractPlugin):
 
     @classmethod
     def get_plugin_name(cls) -> str:
-        return "TemplatePlugin"
+        return "AuthCore"
 
     @classmethod
     def get_plugin_description(cls) -> str:
-        return "description test"
+        return "adds up permissions management"
 
     @classmethod
     def get_plugin_version(cls) -> str:
@@ -25,10 +25,10 @@ class TemplatePlugin(AbstractPlugin):
 
     @classmethod
     def get_plugin_author(cls) -> str:
-        return "None"
+        return "Whth"
 
     def __register_all_config(self):
-        self._config_registry.register_config(self.CONFIG_DETECTED_KEYWORD, "test")
+        self._config_registry.register_config(self.CONFIG_DETECTED_KEYWORD, "auth")
 
     def install(self):
         from graia.ariadne.message.parser.base import ContainKeyword
