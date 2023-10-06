@@ -1,2 +1,2 @@
-# Mieka-ChatBot-Plugin-Template
-a Template repo for Mieka-ChatBot-Plugin
+# AuthCore    
+plugin that adds up permission management utils
