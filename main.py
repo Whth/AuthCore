@@ -15,6 +15,7 @@ class CMD:
     GRANT = "grant"
     New = "new"
     Delete = "del"
+    INFO = "info"
 
 
 class Mode:
@@ -36,22 +37,16 @@ class AuthCore(AbstractPlugin):
 
     @classmethod
     def get_plugin_version(cls) -> str:
-        return "0.0.1"
+        return "0.0.2"
 
     @classmethod
     def get_plugin_author(cls) -> str:
         return "Whth"
 
-    def __register_all_config(self):
-        pass
-
     def install(self):
         from modules.cmd import RequiredPermission, NameSpaceNode, ExecutableNode
         from modules.auth.resources import required_perm_generator
         from modules.auth.permissions import Permission, PermissionCode
-
-        self.__register_all_config()
-        self._config_registry.load_config()
 
         def grant_perm_to_role(perm_label: str, role_label: str) -> str:
             """
@@ -163,6 +158,69 @@ class AuthCore(AbstractPlugin):
             stdout = f"Delete user {user_id}\nSuccess = {self._auth_manager.remove_user(user_id, user_name)}"
             return stdout
 
+        def role_info(role_id: int, role_name: str) -> str:
+            """
+            Get information about a role based on its ID and name.
+
+            Parameters:
+                role_id (int): The ID of the role.
+                role_name (str): The name of the role.
+
+            Returns:
+                str: A string containing information about the role.
+                If the role is not found, "Not found" is returned.
+                If the role is found, the string contains the role's ID, name, and permissions.
+            """
+            stdout = f"Query Role {role_id} {role_name}\n---------------\n"
+            matched_role = list(
+                filter(lambda role: role.id == role_id and role.name == role_name, self._auth_manager.roles)
+            )
+            if len(matched_role) == 0:
+                stdout += "Not found"
+            elif len(matched_role) == 1:
+                stdout += f"ID: {matched_role[0].id}\n"
+                stdout += f"Name: {matched_role[0].name}\n"
+                permission_string = "\n".join(
+                    [f"[{i}]: {perm.unique_label}" for i, perm in enumerate(matched_role[0].permissions)]
+                )
+                stdout += f"Permissions: \n{permission_string}\n"
+            else:
+                return "Query failed due to Illegal Data"
+            return stdout
+
+        def user_info(user_id: int, user_name: str) -> str:
+            """
+            Retrieves information about a user based on their ID and name.
+
+            Args:
+                user_id (int): The ID of the user.
+                user_name (str): The name of the user.
+
+            Returns:
+                str: A string containing the user information.
+                If the user is not found, "Not found" is appended to the string.
+                If the user is found, their ID, name, and roles are included in the string.
+                    - If the user is found, the roles are listed on separate lines.
+                    - If the query fails due to illegal data,
+                    "Query failed due to Illegal Data" is returned.
+            """
+            stdout = f"Query User {user_id} {user_name}\n---------------\n"
+            matched_user = list(
+                filter(lambda user: user.id == user_id and user.name == user_name, self._auth_manager.users)
+            )
+            if len(matched_user) == 0:
+                stdout += "Not found"
+            elif len(matched_user) == 1:
+                stdout += f"ID: {matched_user[0].id}\n"
+                stdout += f"Name: {matched_user[0].name}\n"
+                roles_string = "\n".join(
+                    [f"[{i}]: {role.unique_label}" for i, role in enumerate(matched_user[0].roles)]
+                )
+                stdout += f"Role: \n{roles_string}\n"
+            else:
+                return "Query failed due to Illegal Data"
+            return stdout
+
         su_perm = Permission(id=PermissionCode.SuperPermission.value, name=self.get_plugin_name())
         req_perm: RequiredPermission = required_perm_generator(
             target_resource_name=self.get_plugin_name(), super_permissions=[su_perm]
@@ -253,6 +311,23 @@ class AuthCore(AbstractPlugin):
                             name=CMD.USER,
                             source=delete_user,
                             help_message=delete_user.__doc__,
+                        ),
+                    ],
+                ),
+                NameSpaceNode(
+                    name=CMD.INFO,
+                    required_permissions=req_perm,
+                    help_message="allow to get info of role,user",
+                    children_node=[
+                        ExecutableNode(
+                            name=CMD.ROLE,
+                            source=role_info,
+                            help_message=role_info.__doc__,
+                        ),
+                        ExecutableNode(
+                            name=CMD.USER,
+                            source=user_info,
+                            help_message=user_info.__doc__,
                         ),
                     ],
                 ),
