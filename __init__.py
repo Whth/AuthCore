@@ -74,7 +74,11 @@ class AuthCore(AbstractPlugin):
                 str: A string indicating the success of the operation.
 
             """
-            stdout = f"Grant {role_label} to {user_label}\nSuccess = {self._auth_manager.grant_role_to_user(role_label, user_label)}"
+            # TODO: use id as the unique identifier for user, since that
+            stdout = (
+                f"Grant {role_label} to {user_label}\n"
+                f"Success = {self._auth_manager.grant_role_to_user(role_label, user_label)}"
+            )
             return stdout
 
         def new_permission(perm_id: int, perm_name: str) -> str:
@@ -85,10 +89,14 @@ class AuthCore(AbstractPlugin):
             - perm_id (int): The ID of the new permission.
             - perm_name (str): The name of the new permission.
 
-            Returns:
-            - str: A string indicating the success of creating the new permission. It includes the permission ID and name, as well as the result of adding the permission to the authentication manager.
+            Returns: - str: A string indicating the success of creating the new permission.
+            It includes the permission ID and name,
+            as well as the result of adding the permission to the authentication manager.
             """
-            stdout = f"New permission {perm_id} {perm_name}\nSuccess = {self._auth_manager.add_perm_from_info(perm_id, perm_name)}"
+            stdout = (
+                f"New permission {perm_id} {perm_name}\n"
+                f"Success = {self._auth_manager.add_perm_from_info(perm_id, perm_name)}"
+            )
             return stdout
 
         def delete_permission(perm_id: int, perm_name: str) -> str:
@@ -111,7 +119,8 @@ class AuthCore(AbstractPlugin):
                 role_name (str): The name of the new role.
 
             Returns:
-                str: A string indicating the success of the operation. It includes the new role ID and role name, as well as whether the role was successfully added.
+                str: A string indicating the success of the operation.
+                It includes the new role ID and role name, as well as whether the role was successfully added.
             """
             stdout = f"New role {role_id} {role_name}\nSuccess = {self._auth_manager.add_role(role_id, role_name)}"
             return stdout
