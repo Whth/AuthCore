@@ -24,7 +24,8 @@ class Mode:
 
 
 class AuthCore(AbstractPlugin):
-    def _get_config_parent_dir(self) -> str:
+    @classmethod
+    def _get_config_dir(cls) -> str:
         return os.path.abspath(os.path.dirname(__file__))
 
     @classmethod
@@ -59,7 +60,10 @@ class AuthCore(AbstractPlugin):
             Returns:
                 str: A string indicating the success of the permission grant operation.
             """
-            stdout = f"Grant {perm_label} to {role_label}\nSuccess = {self._auth_manager.grant_perm_to_role(perm_label, role_label)}"
+            stdout = (
+                f"Grant {perm_label} to {role_label}\n"
+                f"Success = {self._auth_manager.grant_perm_to_role(perm_label, role_label,)}"
+            )
             return stdout
 
         def grant_role_to_user(role_label: str, user_label: str) -> str:
