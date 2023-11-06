@@ -1,4 +1,4 @@
-from modules.plugin_base import AbstractPlugin
+from modules.shared import AbstractPlugin, NameSpaceNode, ExecutableNode
 
 __all__ = ["AuthCore"]
 
@@ -39,10 +39,6 @@ class AuthCore(AbstractPlugin):
         return "Whth"
 
     def install(self):
-        from modules.cmd import RequiredPermission, NameSpaceNode, ExecutableNode
-        from modules.auth.resources import required_perm_generator
-        from modules.auth.permissions import Permission, PermissionCode
-
         def grant_perm_to_role(perm_label: str, role_label: str) -> str:
             """
             Grant permission to a role.
@@ -72,7 +68,7 @@ class AuthCore(AbstractPlugin):
                 str: A string indicating the success of the operation.
 
             """
-            # TODO: use id as the unique identifier for user, since that
+
             stdout = (
                 f"Grant {role_label} to {user_label}\n"
                 f"Success = {self._auth_manager.grant_role_to_user(role_label, user_label)}"
@@ -228,18 +224,14 @@ class AuthCore(AbstractPlugin):
                 return "Query failed due to Illegal Data"
             return stdout
 
-        su_perm = Permission(id=PermissionCode.SuperPermission.value, name=self.get_plugin_name())
-        req_perm: RequiredPermission = required_perm_generator(
-            target_resource_name=self.get_plugin_name(), super_permissions=[su_perm]
-        )
         tree = NameSpaceNode(
             name=CMD.ROOT,
-            required_permissions=req_perm,
+            required_permissions=self.required_permission,
             help_message=self.get_plugin_description(),
             children_node=[
                 NameSpaceNode(
                     name=CMD.LIST,
-                    required_permissions=req_perm,
+                    required_permissions=self.required_permission,
                     help_message="allow view of authorization elements",
                     children_node=[
                         ExecutableNode(
@@ -262,7 +254,7 @@ class AuthCore(AbstractPlugin):
                 ),
                 NameSpaceNode(
                     name=CMD.GRANT,
-                    required_permissions=req_perm,
+                    required_permissions=self.required_permission,
                     help_message="allow to grant permissions\nAdd Perm to Role\nAdd Role to User",
                     children_node=[
                         ExecutableNode(
@@ -279,7 +271,7 @@ class AuthCore(AbstractPlugin):
                 ),
                 NameSpaceNode(
                     name=CMD.New,
-                    required_permissions=req_perm,
+                    required_permissions=self.required_permission,
                     help_message="allow to create new perm,role,user",
                     children_node=[
                         ExecutableNode(
@@ -301,7 +293,7 @@ class AuthCore(AbstractPlugin):
                 ),
                 NameSpaceNode(
                     name=CMD.Delete,
-                    required_permissions=req_perm,
+                    required_permissions=self.required_permission,
                     help_message="allow to delete perm,role,user",
                     children_node=[
                         ExecutableNode(
@@ -323,7 +315,7 @@ class AuthCore(AbstractPlugin):
                 ),
                 NameSpaceNode(
                     name=CMD.INFO,
-                    required_permissions=req_perm,
+                    required_permissions=self.required_permission,
                     help_message="allow to get info of role,user",
                     children_node=[
                         ExecutableNode(
@@ -341,5 +333,4 @@ class AuthCore(AbstractPlugin):
             ],
         )
 
-        self._auth_manager.add_perm_from_req(req_perm)
         self._root_namespace_node.add_node(tree)
